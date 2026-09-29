@@ -1,0 +1,2 @@
+# Python >= 3.11. The standalone notifier and QQ login use only the standard library.
+# No AstrBot, browser automation, requests, Pillow, or third-party runtime package required.

@@ -8,3 +8,14 @@ __pycache__
 config/
 node_modules/
 debug/
+
+# Local authorization material must never enter Git or Actions artifacts.
+.secrets/
+.venv/
+*.log
+qr_code*.png
+qq_qr*.png
+*credentials*.json
+*auth*.json
+cookies*.txt
+gh-config/

@@ -14,6 +14,14 @@
 
 ---
 
+## 无畏契约国服：GitHub Actions + QQ 扫码 + 微信推送
+
+新增独立程序 [`valorant_cn`](valorant_cn/README.md)：本地 QQ 扫码，无需 QQ 密码、AstrBot 或抓包；
+凭证直接写入 Repository Secret，GitHub Actions 每天北京时间 08:17 查询每日四款皮肤并推送 PushPlus。
+电脑和手机在日常定时运行时无需在线。首次授权与凭证过期时需本人扫码。
+
+详情见 [配置与安全说明](valorant_cn/README.md)。此独立目录采用 AGPL-3.0，原有脚本仍遵循原许可。
+
 ## 📥 订阅方式 | How to Subscribe
 
 在青龙面板中添加订阅：
