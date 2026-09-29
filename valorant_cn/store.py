@@ -156,8 +156,8 @@ def push(token, title, content, http=None):
         result = http.json("https://www.pushplus.plus/send", body={"token": token, "title": title,
                            "content": content, "template": "html", "channel": "wechat"})
         if str(result.get("code")) != "200":
-            raise SafeError("push")
-    except SafeError:
+            raise SafeError("push", service_code=result.get("code"))
+    except SafeError as e:
         # Sending is not idempotent: do not blindly retry and spam on ambiguous timeouts.
-        raise SafeError("push") from None
+        raise SafeError("push", http_status=e.http_status, service_code=e.service_code) from None
     return result.get("data")  # Acceptance is asynchronous, not proof of WeChat delivery.

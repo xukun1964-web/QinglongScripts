@@ -5,6 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import gzip
 import http.cookiejar
 import json
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -28,9 +29,18 @@ MESSAGES = {
 
 
 class SafeError(Exception):
-    def __init__(self, code):
+    def __init__(self, code, *, http_status=None, service_code=None):
         self.code = code if code in MESSAGES else "internal"
-        super().__init__(MESSAGES[self.code])
+        self.http_status = http_status if type(http_status) is int and 100 <= http_status <= 599 else None
+        self.service_code = None
+        if type(service_code) in (str, int) and re.fullmatch(r"[0-9]{1,6}", str(service_code)):
+            self.service_code = int(service_code)
+        detail = ""
+        if self.http_status is not None:
+            detail += f" HTTP={self.http_status}"
+        if self.service_code is not None:
+            detail += f" PushPlus={self.service_code}"
+        super().__init__(MESSAGES[self.code] + detail)
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -88,7 +98,7 @@ class Http:
                     if len(payload) > 2_000_000:
                         raise SafeError("protocol")
                 if status == 429 or status >= 500:
-                    raise SafeError("network")
+                    raise SafeError("network", http_status=status)
                 return status, response_headers, payload
             except (urllib.error.URLError, TimeoutError, OSError):
                 error = SafeError("network")
@@ -103,11 +113,11 @@ class Http:
     def json(self, url, **kwargs):
         status, _, raw = self.request(url, **kwargs)
         if 300 <= status < 400:
-            raise SafeError("redirect")
+            raise SafeError("redirect", http_status=status)
         if status in (401, 403):
-            raise SafeError("auth")
+            raise SafeError("auth", http_status=status)
         if status != 200:
-            raise SafeError("protocol")
+            raise SafeError("protocol", http_status=status)
         try:
             data = json.loads(raw)
         except (ValueError, UnicodeError):

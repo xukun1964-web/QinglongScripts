@@ -175,6 +175,13 @@ class LoginTests(unittest.TestCase):
 
 
 class LogSafetyTests(unittest.TestCase):
+    def test_only_numeric_diagnostic_codes_are_exposed(self):
+        error = SafeError('push', http_status=403, service_code='900')
+        self.assertIn('HTTP=403', str(error))
+        self.assertIn('PushPlus=900', str(error))
+        error = SafeError('push', http_status='fake-private-secret', service_code='fake-private-secret')
+        self.assertNotIn('fake-private-secret', str(error))
+
     def capture(self, args, query_error):
         buf = io.StringIO()
         with patch.dict(os.environ, {'VALORANT_AUTH_JSON': json.dumps(AUTH), 'PUSH_PLUS_TOKEN': 'fake-push'}, clear=True), \
