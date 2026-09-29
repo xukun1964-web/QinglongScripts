@@ -40,6 +40,14 @@ class SafeError(Exception):
             detail += f" HTTP={self.http_status}"
         if self.service_code is not None:
             detail += f" PushPlus={self.service_code}"
+            detail += {
+                905: "（请本人在 PushPlus 完成实名认证后重试）",
+                903: "（PUSH_PLUS_TOKEN 无效，请更新 Repository Secret）",
+                900: "（PushPlus 账号受限，请停止重复发送并在 PushPlus 查看限制）",
+                888: "（PushPlus 积分不足，请检查所选渠道设置）",
+                403: "（PushPlus 不允许当前请求 IP，请检查白名单）",
+                401: "（PushPlus 接口未授权，请检查服务设置）",
+            }.get(self.service_code, "")
         super().__init__(MESSAGES[self.code] + detail)
 
 

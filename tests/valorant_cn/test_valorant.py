@@ -182,6 +182,15 @@ class LogSafetyTests(unittest.TestCase):
         error = SafeError('push', http_status='fake-private-secret', service_code='fake-private-secret')
         self.assertNotIn('fake-private-secret', str(error))
 
+    def test_push_identity_failure_is_actionable(self):
+        http = Mock()
+        http.json.return_value = {'code': 905, 'msg': 'fake-private-secret'}
+        with self.assertRaises(SafeError) as error:
+            push('fake-token', 'test', 'body', http)
+        self.assertIn('实名认证', str(error.exception))
+        self.assertNotIn('fake-private-secret', str(error.exception))
+        self.assertEqual(http.json.call_count, 1)
+
     def capture(self, args, query_error):
         buf = io.StringIO()
         with patch.dict(os.environ, {'VALORANT_AUTH_JSON': json.dumps(AUTH), 'PUSH_PLUS_TOKEN': 'fake-push'}, clear=True), \
